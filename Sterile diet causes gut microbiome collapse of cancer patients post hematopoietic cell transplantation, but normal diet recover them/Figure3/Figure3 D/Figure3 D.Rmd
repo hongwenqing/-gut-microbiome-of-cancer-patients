@@ -1,0 +1,49 @@
+---
+title: "Figure3 D"
+author: "Wenqing Hong"
+date: "2023-08-05"
+output: html_document
+---
+```{r}
+rm(list = ls())
+```
+
+
+```{r}
+library(ggplot2)
+library(vegan)
+library(ape)
+library(RColorBrewer)
+library(ggstar)
+library(ggrepel)
+library(patchwork)
+```
+
+```{r}
+data <- read.csv(file = "network_data.csv",header = T)
+```
+
+```{r}
+generate_plot <- function(column_index) {
+  column_name <- colnames(data)[column_index]
+  
+  p <- ggplot(data, aes_string("sample", column_name, group = "1")) +
+    geom_path(size = 2, color = "#B2182B") +
+    geom_point(size = 6, color = "#B2182B", shape = 17) +
+    theme(panel.background = element_blank(),
+          axis.line = element_line())
+  
+  return(p)
+}
+
+
+column_indices <- c(2:7)  
+
+plots <- lapply(column_indices, generate_plot)
+
+combined_plot <- wrap_plots(plots, ncol = 2)
+combined_plot
+
+ggsave("Figure3 D.pdf", combined_plot, width = 10, height = 12)
+```
+

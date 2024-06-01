@@ -1,0 +1,86 @@
+---
+title: "Figure1 F"
+author: "Wenqing Hong"
+date: "2023-06-26"
+output: html_document
+---
+
+
+```{r}
+remove(list = ls())
+
+Palette <- c("#4769a4","#9ac7aa","#f5bc79","#e68654","#c55d51","#903641","#fcf5bb","#d5e1a7","#9ac7aa",
+             "#599ab1","#66CC99","#999999","#ADD1E5")
+abundance <- read.table("p.txt",header = TRUE,sep = "\t")
+abundance <- as.data.frame(abundance)
+taxon <- gsub(".*(p__)","",abundance$Taxon)
+taxon <- gsub(".*(Bacteria;)","",taxon)
+taxon <- gsub(".*(Other)","",taxon)
+taxon <- gsub("(\\[)","",taxon)
+taxon <- gsub("(\\])","",taxon)
+abundance$Taxon <- taxon
+abundance[abundance==""] <- NA
+abundance <- na.omit(abundance)
+abundance <- t(abundance)
+colnames(abundance) <- abundance[1,]
+abundance <- abundance[-1,]
+abundance <- as.matrix(abundance)
+f.abundance <- matrix(as.numeric(abundance),nrow = nrow(abundance))
+rownames(f.abundance) <- rownames(abundance)
+colnames(f.abundance) <- colnames(abundance)
+f.abundance <- t(f.abundance)
+sum <- apply(f.abundance,1,sum) 
+f.abundance <- cbind(f.abundance,sum)
+f.abundance <- as.data.frame(f.abundance)
+f.abundance <- f.abundance[order(f.abundance[,"sum"],decreasing = T),]
+f.abundance <- subset(f.abundance, select = -sum)
+f.abundance <- t(f.abundance)
+f.abundance <- subset(f.abundance, select = -unclassified_k__norank_d__Bacteria)
+f.abundance <- t(f.abundance)
+
+f.abundance <- f.abundance[1:10,]
+f.abundance <- t(f.abundance)
+sum <- apply(f.abundance,1,sum) 
+Others <- 1-sum
+f.abundance <- cbind(f.abundance,Others)
+
+sample.name <- read.table("Group.txt",head=F,colClasses=c("character","character"),sep = "\t")
+f.abundance <- as.data.frame(f.abundance)
+f.abundance$V1 <- rownames(f.abundance)
+f.abundance <- merge(sample.name,f.abundance,by = "V1",sort = F)
+rownames(f.abundance) <- f.abundance$V2
+f.abundance <- subset(f.abundance, select = -V1)
+f.abundance <- subset(f.abundance, select = -V2)
+f.abundance <- t(f.abundance)
+
+library(reshape2)
+taxon <- melt(f.abundance)
+colnames(taxon) <- c("Taxon","variable","value")
+library(ggplot2)
+library(ggalluvial)
+p <- ggplot(data = taxon,aes(x = variable, y = value, alluvium = Taxon, stratum = Taxon))
+p1 <- p + geom_alluvium(aes(fill = Taxon),alpha = .5,width = 0.6) + 
+  geom_stratum(aes(fill = Taxon),width = 0.6)
+p2 <- p1 + ylab(label = "Relative Abundance") + xlab(label = "")
+p3 <- p2 + scale_fill_manual(values = Palette)
+p4 <- p3 + theme_bw()+ theme(panel.grid=element_blank()) + 
+  theme(panel.border = element_blank()) +
+  theme(panel.background=element_rect(fill='transparent', 
+                                      color='black'),plot.margin = unit(c(3,5,1,1),"mm"))
+p5 <- p4 + theme(axis.text.x=element_text(colour="black",size=12,face = "bold",angle = -90,vjust = 0.5,hjust = 0)) + 
+  theme(axis.text.y=element_text(colour = "black",size = 18)) + 
+  theme(axis.line = element_line(colour = "black"))+ 
+  theme(axis.title.y = element_text(size = 24,face = "bold",
+                                    margin = unit(c(0,1,0,1),"lines")))
+p6 <- p5 + scale_y_continuous(limits = c(0,1),expand = c(0,0))
+p7 <- p6 + theme(legend.text = element_text(colour = "black",size = 15)) + 
+  theme(legend.title = element_text(size = 18,colour = "black"))
+p8 <- p7 + theme(text = element_text(family = ""))
+p8
+```
+
+```{r}
+ggsave("Figure1 F.pdf", height = 8,width =10)
+```
+
+

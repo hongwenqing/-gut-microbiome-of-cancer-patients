@@ -1,0 +1,92 @@
+---
+title: "Figure1 C"
+author: "Wenqing Hong"
+date: "2023/5/19"
+output: html_document
+---
+```{r}
+library(ggplot2)
+library(ggpubr)
+rm(list = ls())
+```
+
+```{r}
+data <- read.csv("data.csv")
+```
+
+```{r}
+summary(lm(data$OTUnum~data$group))
+shapiro.test(residuals(lm(data$OTUnum~data$group)))
+```
+
+```{r}
+p2<-ggplot() + geom_point(data=data, aes(x= group, y=OTUnum,color="#b975ae",fill="#b975ae"), alpha = 0.8, size =5) + 
+  geom_smooth(data=data,aes(x= group, y=OTUnum), method ="lm", col= "#b975ae",fill="#b975ae20",size=2)+
+  labs(x = "",y = "OTUnum")+
+  theme_bw()+
+  scale_colour_manual(values= c("#b975ae"))+
+  scale_fill_manual(values= c("#b975ae"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=15,face="bold"),
+        axis.title=element_text(size=15,face="bold"))+
+  annotate("text",x=4,y=200, label="R2 = 0.102\nP =0.024",
+           size=5,color="black")+
+  scale_x_continuous(breaks =seq(1,5,1), labels = c("S1","S2","S3","S4","S5"))
+p2
+```
+
+```{r}
+summary(lm(data$shannon~data$group))
+shapiro.test(residuals(lm(data$shannon~data$group)))
+```
+
+```{r}
+p<-ggplot() + geom_point(data=data, aes(x= group, y=shannon,color="#573992",fill="#573992"), alpha = 0.8, size =5) + 
+  geom_smooth(data=data,aes(x= group, y=shannon), method ="lm", col= "#573992",fill="#57399220",size=2)+
+  labs(x = "",y = "shannon")+
+  theme_bw()+
+  scale_colour_manual(values= c("#573992"))+
+  scale_fill_manual(values= c("#573992"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=15,face="bold"),
+        axis.title=element_text(size=15,face="bold"))+
+  annotate("text",x=4,y=3, label="R2 = 0.204\nP =0.002",
+           size=5,color="black")+
+  scale_x_continuous(breaks =seq(1,5,1), labels = c("S1","S2","S3","S4","S5"))
+p
+```
+```{r}
+summary(lm(data$chao~data$group))
+shapiro.test(residuals(lm(data$chao~data$group)))
+```
+
+```{r}
+p1<-ggplot() + geom_point(data=data, aes(x= group, y=chao,color="#509b35",fill="#509b35"), alpha = 0.8, size =5) + 
+  geom_smooth(data=data,aes(x= group, y=chao), method ="lm", col= "#509b35",fill="#509b3520",size=2)+
+  labs(x = "",y = "Chao")+
+  theme_bw()+
+  scale_colour_manual(values= c("#509b35"))+
+  scale_fill_manual(values= c("#509b35"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=15,face="bold"),
+        axis.title=element_text(size=15,face="bold"))+
+  annotate("text",x=4,y=3, label="R2 = 0.01\nP =0.244",
+           size=5,color="black")+
+  scale_x_continuous(breaks =seq(1,5,1), labels = c("S1","S2","S3","S4","S5"))
+p1
+```
+
+
+
+
+```{r}
+library(ggpubr)
+ggarrange(p,p1,p2,
+          ncol = 3,nrow = 1,widths=c(1,1),heights=c(1,1),common.legend = TRUE,legend = "right" )
+
+ggsave("Figure1 C.pdf",plot = last_plot(),units = "in",height = 6,width = 25)
+
+```

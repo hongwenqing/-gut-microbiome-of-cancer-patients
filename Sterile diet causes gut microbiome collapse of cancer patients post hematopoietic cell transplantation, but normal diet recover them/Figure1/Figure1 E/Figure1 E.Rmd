@@ -1,0 +1,117 @@
+---
+title: "Figure1 E"
+author: "Wenqing Hong"
+date: "2023-07-29"
+output: html_document
+---
+```{r}
+rm(list = ls())
+```
+
+```{r}
+library(microeco)
+library(ggplot2)
+library(ggplot2) 
+library(reshape2)
+library(tidyr)
+library(dplyr)
+library(ggsignif)
+library(ggpubr)
+library(ggrepel)
+```
+```{r}
+otu <- read.csv("OTU.csv",  header = TRUE, row.names = 1)
+otu <- t(otu)
+dis <- vegan::vegdist(otu, method = 'bray')
+dis <- as.matrix(dis)
+group <- read.csv('group.csv', sep = ",", header = TRUE)
+```
+
+
+```{r}
+env1 <- subset(group, group == 'F')$sample
+dis_env1 <- dis[env1,env1]
+
+env2 <- subset(group, group== 'S1')$sample
+dis_env2 <- dis[env2,env2]
+ 
+env3 <- subset(group, group == 'S2')$sample
+dis_env3 <- dis[env3,env3]
+
+env4 <- subset(group, group == 'S3')$sample
+dis_env4 <- dis[env4,env4]
+ 
+env5 <- subset(group, group== 'S4')$sample
+dis_env5 <- dis[env5,env5]
+ 
+env6 <- subset(group, group == 'S5')$sample
+dis_env6 <- dis[env6,env6]
+
+env7 <- subset(group, group == 'S6')$sample
+dis_env7 <- dis[env7,env7]
+ 
+env8 <- subset(group, group== 'S7')$sample
+dis_env8 <- dis[env8,env8]
+ 
+env9 <- subset(group, group == 'S8')$sample
+dis_env9 <- dis[env9,env9]
+
+env10 <- subset(group, group == 'S9')$sample
+dis_env10 <- dis[env10,env10]
+
+dis_env1 <- as.vector(as.dist(dis_env1))
+dis_env2 <- as.vector(as.dist(dis_env2))
+dis_env3 <- as.vector(as.dist(dis_env3))
+dis_env4 <- as.vector(as.dist(dis_env4))
+dis_env5 <- as.vector(as.dist(dis_env5))
+dis_env6 <- as.vector(as.dist(dis_env6))
+dis_env7 <- as.vector(as.dist(dis_env7))
+dis_env8 <- as.vector(as.dist(dis_env8))
+dis_env9 <- as.vector(as.dist(dis_env9))
+dis_env10 <- as.vector(as.dist(dis_env10))
+
+
+dat <- data.frame(
+    dis = c(dis_env1, dis_env2, dis_env3, dis_env4 ,dis_env5, dis_env6, dis_env7, dis_env8, dis_env9,dis_env10),
+    group = factor(c(
+        rep('F', length(dis_env1)), 
+        rep('S1', length(dis_env2)), 
+        rep('S2', length(dis_env3)), 
+        rep('S3', length(dis_env4)), 
+        rep('S4', length(dis_env5)), 
+        rep('S5', length(dis_env6)), 
+        rep('S6', length(dis_env7)), 
+        rep('S7', length(dis_env8)), 
+        rep('S8', length(dis_env9)), 
+        rep('S9', length(dis_env10))
+    ), levels = c('F', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8','S9'))
+)
+
+
+library(ggplot2)
+ppp <- compare_means(formula = dis~ group,data=dat,method = 'wilcox.test')
+write.csv(ppp, file = "compare.csv", row.names = FALSE)
+```
+
+
+```{r}
+p1 <- ggplot(dat, aes(x=group, y=dis) )+
+  geom_violin(fill = NA,aes(color = group),linewidth=2, trim = FALSE) +
+  geom_boxplot(fill = NA,aes(color = group), notch = FALSE, width = 0.3,linewidth=2) +
+  geom_jitter(aes(fill = factor(group), color = factor(group)), position = position_jitter(0.17), size =8,alpha=0.5) +
+ 
+  geom_line(data = dat, aes(as.numeric(group), dis, color = group), position = position_dodge(0.6), size = 1.3) + 
+  theme_bw(base_line_size = 1.05, base_rect_size = 1.05) +
+  theme(axis.text = element_text(colour = "black", size = 9)) +
+  labs(x = "", y = "Bray-Curtis dissimilarity ", color = "", fill = "") +
+  scale_fill_manual(values = c("#B2182B","#E69F00","#999999","#009E73","#F0E442","#0072B2","#D55E00",
+                                "#CC79A7","#CC6666","#56B4E9")) +
+  scale_color_manual(values = c("#B2182B","#E69F00","#999999","#009E73","#F0E442","#0072B2","#D55E00",
+                                "#CC79A7","#CC6666","#56B4E9")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  ylim(-0.5,1.5)
+p1
+ggsave("Figure1 E.pdf", width = 18, height = 13)
+```
+
+

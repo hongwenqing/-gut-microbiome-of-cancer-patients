@@ -1,0 +1,60 @@
+---
+title: "Figure3 C"
+author: "Wwenqing Hong"
+date: "2023-08-05"
+output: html_document
+---
+```{r}
+rm(list = ls())
+```
+
+```{r}
+library(ggplot2)
+library(vegan)
+library(ape)
+library(RColorBrewer)
+library(ggstar)
+library(ggrepel)
+```
+
+```{r}
+data <- read.csv(file = "ZI-PI.csv",header = T)
+```
+
+
+```{r}
+p1 <- ggplot(data, aes(Pi, Zi),fill=type,color=type) +
+  geom_point(aes(color = type), alpha = 0.5, size = 2) +
+  scale_color_manual(values = c("#B2182B", "#E69F00", "#999999", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#CC6666", "#56B4E9"),
+                     )+
+  
+  theme(panel.grid = element_blank(), axis.line = element_line(colour = 'black'),
+        panel.background = element_blank(), legend.key = element_blank()) +
+  labs(x = 'Among-module connectivities', y = 'Within-module connectivities', color = '') +
+  geom_vline(xintercept = 0.62) +
+  geom_hline(yintercept = 2.5)
+p1
+```
+
+#perfect
+```{r}
+p1 <- ggplot() +
+  geom_star(data=data, aes(x=Pi, y=Zi, fill = type, starshape= type, color=type), size=8) +
+  scale_fill_manual(values = c("#B2182B", "#E69F00", "#999999", "#009E73", "#0072B2", "#CC79A7", "#CC6666", "#56B4E9")) +
+  scale_color_manual(values = c("#B2182B", "#E69F00", "#999999", "#009E73", "#0072B2", "#CC79A7", "#CC6666", "#56B4E9")) +
+  theme(panel.grid = element_blank(), axis.line = element_line(colour = 'black'),
+        panel.background = element_blank(), legend.key = element_blank()) +
+  labs(x = 'Among-module connectivities', y = 'Within-module connectivities', color = '') +
+  geom_vline(xintercept = 0.62) +
+  geom_hline(yintercept = 2.5)
+p1
+ggsave("Figure3 C.pdf",height = 15,width = 18)
+```
+
+
+
+
+
+
+
+

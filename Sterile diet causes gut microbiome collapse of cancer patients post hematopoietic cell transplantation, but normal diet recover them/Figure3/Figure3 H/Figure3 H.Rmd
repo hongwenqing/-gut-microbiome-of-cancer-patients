@@ -1,0 +1,41 @@
+---
+title: "Figure3 H"
+author: "Wenqing Hong"
+date: "2022/8/19"
+output: html_document
+---
+
+```{r}
+remove(list = ls())
+```
+
+```{r}
+library(dplyr)
+library(linkET)
+library(psych)
+library(ggplot2)
+library(corrplot)
+sampledata <- read.csv("Network data.csv", header = TRUE,row.names = 1)
+sampledata <- t(sampledata)
+sampledata <- as.data.frame(sampledata)
+envdata <- read.csv("cohension_neg or _pos.csv", header=TRUE,row.names=1)
+group <- read.csv("Group.csv",header = T,row.names = 1)
+merged_data <- merge(envdata, group, by = "row.names", all.x = TRUE)
+rownames(merged_data) <- merged_data[, 1]
+merged_data <- merged_data[, -1]
+averaged_data <- aggregate(. ~ Group, data = merged_data, FUN = mean)
+rownames(averaged_data ) <- averaged_data [, 1]
+averaged_data  <- averaged_data [, -1]
+```
+
+
+```{r}
+env_spearman <- cor(sampledata,averaged_data, method = 'spearman')
+env_corr <- corr.test(sampledata,averaged_data,method = 'spearman')
+```
+
+
+```{r}
+corrplot(env_corr$r, p.mat = env_corr$p, method = 'square', sig.level = 0.05,  tl.cex = 0.8,tl.col = "black" ,outline = TRUE,is.corr = T)
+
+```

@@ -1,0 +1,66 @@
+---
+title: "Figure1 G"
+author: "Wenqing Hong"
+date: "2023/8/19"
+output: html_document
+---
+
+```{r}
+remove(list = ls())
+library(readxl) 
+library(ggplot2)
+metadata <- read.table("group.txt", header=T,  comment.char="")
+otutab <- read.table("OTU.txt", header=T, sep = "\t")
+```
+
+
+
+```{r cars}
+metadata2 <- data.frame(sampleID=character(),group=character(),avd=numeric(),stringsAsFactors = FALSE) 
+
+metadata$group <- as.factor(metadata$group)
+ng <- nlevels(metadata$group)
+nid <- nrow(metadata)
+nr <- nid/ng 
+  for(i in 1:ng){
+    df <- subset(otutab,select = c((2+(i-1)*nr):(2+(i-1)*nr+nr-1))) 
+    row_mean <- apply(df,1,mean)
+    df$mean <- row_mean
+    row_sd <- apply(df,1,sd) 
+    df$sd <- row_sd 
+    df <- df[which(rowSums(df)>0),] 
+    df1 <- subset(df,select = c(mean,sd))
+    df2 <- subset(df,select = c(1:nr))
+    AI <- abs(df2-df1$mean)/df1$sd
+    AI[is.na(AI)]=0
+    AIV <- apply(AI,2,mean) 
+    AIV <- as.data.frame(AIV)
+    rownames(metadata) <- metadata$sampleID
+    idx <- rownames(metadata)%in%rownames(AIV)
+    metadatan <- metadata[idx,]
+    metadatan$avd <- AIV[1:nr,]
+    metadata2 <- rbind(metadata2,metadatan) 
+  }
+```
+
+
+```{r}
+p = ggplot(metadata2, aes(x=group, y=avd, color=group)) +
+  geom_boxplot(alpha=1, outlier.shape = NA, outlier.size=0, size=2.5, width=0.5, fill="transparent") +
+  labs(x="Groups", y="AVD") + theme_classic() +
+  geom_jitter( size=5, alpha=0.7)+
+  scale_fill_manual(values = c("#B2182B", "#E69F00", "#999999", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#CC6666", "#56B4E9")) +
+  scale_color_manual(values = c("#B2182B", "#E69F00", "#999999", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#CC6666", "#56B4E9")) +
+  theme_bw() +
+  theme(
+  panel.grid = element_blank(),
+  axis.title.x = element_text(size = 12),
+  axis.title.y = element_text(size = 12, angle = 90),
+  axis.text.y = element_text(size = 10),
+  axis.text.x = element_text(size = 10),
+  axis.text = element_text(size = 8, colour = "black")
+) 
+p
+
+ggsave("Figure1 G.pdf", plot = p, width = 12, height = 9)
+```

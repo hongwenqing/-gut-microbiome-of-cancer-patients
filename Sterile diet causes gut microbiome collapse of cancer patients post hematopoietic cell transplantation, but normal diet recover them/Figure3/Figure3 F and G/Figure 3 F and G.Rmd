@@ -1,0 +1,116 @@
+---
+title: " Figure 3F and G"
+author: "Wenqing Hong" 
+date: "2023-08-05"
+output: html_document
+---
+```{r}
+rm(list = ls())
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+neg <- read.csv(file = "cohension_neg.csv",header = T,row.names = 1)
+
+df <- neg%>% group_by(Group)%>%
+  summarise(mean= mean(C_neg), sd= sd(C_neg))
+```
+
+```{r}
+
+model = aov(C_neg ~ Group, data=neg)
+Tukey_HSD = TukeyHSD(model, ordered = TRUE, conf.level = 0.95)
+Tukey_HSD_table = as.data.frame(Tukey_HSD$Group)
+library(multcompView)
+generate_label_df = function(TUKEY, variable){
+  Tukey.levels = TUKEY[[variable]][,4]
+  Tukey.labels = data.frame(multcompLetters(Tukey.levels)['Letters'])
+  Tukey.labels$Group = rownames(Tukey.labels)
+  Tukey.labels=Tukey.labels[order(Tukey.labels$Group), ]
+  return(Tukey.labels)
+}
+LABELS = generate_label_df(Tukey_HSD , "Group")
+neg$stat=LABELS[as.character(neg$Group),]$Letters
+max=max(neg$C_neg)
+```
+
+```{r}
+my_color <- c("#B2182B", "#E69F00", "#999999", "#009E73", "#0072B2", "#CC79A7", "#CC6666", "#56B4E9")
+```
+
+```{r}
+pp1 <- ggplot()+ 
+  geom_bar(df,mapping=aes(x=Group,y=mean), fill = "white",size = 1.5,color =my_color,position="dodge",stat="identity",width =0.6)+
+  geom_errorbar(df,mapping=aes(x = Group,ymin = mean-sd, ymax = mean+sd),width = 0.3,color =my_color, size=1.5)+
+  geom_jitter(neg, mapping=aes(x=Group,y=C_neg,fill=Group,color=Group),size = 5,width = 0.2,alpha=0.5)+ 
+  geom_line(df,mapping=aes(x=Group,y=mean,group=1),size=3,color="#214e9f")+
+  geom_point(df,mapping=aes(x=Group,y=mean),color="#214e9f",size=8,shape=17,alpha=0.5)+
+  scale_color_manual(values =my_color)+ 
+  geom_text(data=neg, aes(x=Group, y=max, label=stat)) +
+  
+  theme_classic(base_line_size = 1)+
+  theme(panel.grid=element_blank(),
+        axis.text=element_text(color='black',size=13,face = "bold"),
+        axis.title.y = element_text(color='black',size=15,face = "bold"),
+        legend.text = element_text(color='black',size=13,face = "bold"),
+        legend.title = element_blank(),
+        legend.position = "none")+
+  labs(x=NULL,y="Negative cohesion")
+pp1
+ggsave("Figure3 G.pdf",units = "in",height = 7,width = 12)
+```
+
+
+```{r}
+pos <- read.csv(file = "cohension_pos.csv",header = T,row.names = 1)
+df1 <- pos%>% group_by(Group)%>%
+  summarise(mean= mean(C_pos), sd= sd(C_pos))
+```
+
+```{r}
+
+model = aov(C_pos ~ Group, data=pos)
+Tukey_HSD = TukeyHSD(model, ordered = TRUE, conf.level = 0.95)
+Tukey_HSD_table = as.data.frame(Tukey_HSD$Group)
+library(multcompView)
+generate_label_df = function(TUKEY, variable){
+
+  Tukey.levels = TUKEY[[variable]][,4]
+  Tukey.labels = data.frame(multcompLetters(Tukey.levels)['Letters'])
+
+  Tukey.labels$Group = rownames(Tukey.labels)
+  Tukey.labels=Tukey.labels[order(Tukey.labels$Group), ]
+  return(Tukey.labels)
+}
+LABELS = generate_label_df(Tukey_HSD , "Group")
+pos$stat=LABELS[as.character(pos$Group),]$Letters
+max=max(pos$C_pos)
+```
+
+```{r}
+pp <- ggplot()+ 
+  geom_bar(df1,mapping=aes(x=Group,y=mean), fill = "white",size = 1.5,color =my_color,position="dodge",stat="identity",width =0.6)+
+  geom_errorbar(df1,mapping=aes(x = Group,ymin = mean-sd, ymax = mean+sd),width = 0.3,color =my_color, size=1.5)+
+  geom_jitter(pos, mapping=aes(x=Group,y=C_pos,fill=Group,color=Group),size = 5,width = 0.2,alpha=0.5)+ 
+  geom_line(df1,mapping=aes(x=Group,y=mean,group=1),size=3,color="#e51d1e")+
+  geom_point(df1,mapping=aes(x=Group,y=mean),color="#e51d1e",size=8,shape=17,alpha=0.5)+
+  scale_color_manual(values =my_color)+ 
+  geom_text(data=pos, aes(x=Group, y=max, label=stat)) +
+
+  theme_classic(base_line_size = 1)+
+  theme(panel.grid=element_blank(),
+        axis.text=element_text(color='black',size=13,face = "bold"),
+        axis.title.y = element_text(color='black',size=15,face = "bold"),
+        legend.text = element_text(color='black',size=13,face = "bold"),
+        legend.title = element_blank(),
+        legend.position = "none")+
+  labs(x=NULL,y="Positive cohesion")
+pp
+ggsave("Figure3 F.pdf",units = "in",height = 7,width = 12)
+```
+
+
+
+
+

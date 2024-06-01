@@ -1,0 +1,59 @@
+---
+title: "Figure1 B OTUnum"
+author: "Wenqing Hong"
+date: "2023-07-29"
+output: html_document
+---
+
+```{r}
+remove(list = ls())
+df<-read.csv("OTUnum.csv")
+library(reshape2)
+library(Rmisc)
+library(ggplot2)
+library(ggsignif)
+library(ggpubr)
+df<-data.frame(df)
+df1<-melt(df)
+```
+
+```{r}
+result_long_count <- summarySE(df1, measurevar="value",
+                               groupvars= c("group","variable","type"))
+time<-rep(c(10,1,2,3,4,5,6,7,8,9))
+time<-as.data.frame(time)
+aa<-cbind(result_long_count,time)
+
+ppp <- compare_means(formula = value ~ group,data=df1,method = 'wilcox.test')
+write.csv(ppp, file = "otu compare.csv", row.names = FALSE)
+```
+
+
+
+```{r}
+p <- ggplot(aa, aes(x= time, y=value ,color=type,fill=type,shape=type))+
+  scale_shape_manual(values=c(22,24))+
+  scale_fill_manual(values=c("#b975ae"))+
+  scale_color_manual(values=c("#b975ae")) +
+  scale_y_continuous(expand = c(0, 0))+
+  scale_x_continuous(breaks=seq(0,8,1))+
+  geom_line(size=1.5)+
+  geom_ribbon(aes(ymin = value-se,
+                  ymax = value+se),fill = "#b975ae",alpha=0.2) +
+  geom_point(color="#b975ae",size=10,shape=18)+
+  labs(title="",x="Sampling sites", y = "OTU number")+
+  theme_bw()+
+  theme(panel.grid=element_blank()) +
+  theme(panel.border = element_blank()) +
+  theme(panel.background=element_rect(fill='transparent', color='black'),plot.margin = unit(c(3,5,1,1),"mm"))+
+  theme(axis.text.x=element_text(colour="black",size=30,face = "bold",vjust = 0.5,hjust = 0)) +
+  theme(axis.text.y=element_text(colour = "black",size = 30)) +
+  theme(axis.line = element_line(colour = "black"))+
+  theme(legend.text = element_text(colour = "black",size = 30)) +
+  theme(legend.title = element_text(size = 30,colour = "black")) +
+  theme(axis.title.y = element_text(size = 30,face = "bold",margin = unit(c(0,1,0,1),"lines")))+
+  theme(axis.title.x = element_text(size = 30,face = "bold",margin = unit(c(0,1,0,1),"lines")))+
+  scale_x_continuous(breaks =seq(1,10,1), labels = c("S1","S2","S3","S4","S5","S6","S7","S8","S9","F"))
+p 
+ggsave("Figure1 B OTUnum.pdf", width =12, height = 6)
+```

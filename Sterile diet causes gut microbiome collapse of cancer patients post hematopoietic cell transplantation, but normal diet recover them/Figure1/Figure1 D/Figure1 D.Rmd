@@ -1,0 +1,84 @@
+---
+title: "Figure1 D"
+author: "Wenqing Hong"
+date: "2023-07-29"
+output: html_document
+---
+```{r}
+library(microeco)
+library(ggplot2)
+library(vegan)
+```
+
+
+```{r}
+rm(list = ls())
+```
+
+```{r}
+data1 <- read.csv("OTU.txt", sep = "\t", header = TRUE, row.names = 1)
+otu <- data1[,2:767]
+otu <- t(otu)
+otu <- as.data.frame(otu)
+group <- data.frame(rownames(data1),data1[,1])
+colnames(group) <- c("samples", "group")
+```
+
+```{r}
+data <- microtable$new(sample_table = group,
+                     otu_table = otu)
+```
+
+```{r}
+data$cal_betadiv()
+beta <- trans_beta$new(dataset = data, 
+                       group = "group", 
+                       measure = "bray")
+beta$cal_ordination(ordination = "PCoA")
+data23 <- beta$res_ordination
+```
+
+
+```{r}
+my_colors <- c("#B2182B", "#E69F00", "#999999", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#CC6666", "#56B4E9")
+
+p <- beta$plot_ordination(
+  plot_color = "group", 
+  plot_type = c("point", "ellipse"),
+  point_size = 4, 
+  point_alpha = 1, 
+  ellipse_chull_fill = F,
+  ellipse_chull_alpha = 0.1,
+  centroid_segment_alpha = 0.9, 
+  centroid_segment_size = 1, 
+  centroid_segment_linetype = 1
+) +
+scale_color_manual(values = my_colors) +
+theme_bw() +
+theme(
+  panel.grid = element_blank(),
+  axis.title.x = element_text(size = 12),
+  axis.title.y = element_text(size = 12, angle = 90),
+  axis.text.y = element_text(size = 10),
+  axis.text.x = element_text(size = 10),
+  axis.text = element_text(size = 8, colour = "black")
+) +
+geom_vline(xintercept = 0, linetype = 2) +
+geom_hline(yintercept = 0, linetype = 2)
+p
+```
+
+```{r}
+df <- beta$res_ordination$scores
+Adonis <- adonis2(beta$use_matrix~group,data=df,
+                  distance = "bray", 
+                  permutations = 999) 
+Adonis
+```
+
+```{r}
+p1 <- p+geom_text(aes(x=0.5,y=1),label="Adonis R2=0.19374 P<0.001",size=5,color="black")
+p1
+ggsave("Figure1 D.pdf", width = 16, height = 13)
+```
+
